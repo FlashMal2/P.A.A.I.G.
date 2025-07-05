@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kohana Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: url('/static/kohana.png') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            color: white;
+        }
+
+        .chat-container {
+            background-color: rgba(15, 15, 15, 0.9);
+            max-width: 96%;
+            margin: 20px auto;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px #000;
+        }
+
+        .chat-box {
+            max-height: 60vh;
+            min-height: 200px;
+            overflow-y: auto;
+            background-color: rgba(25, 25, 25, 0.85);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #444;
+            font-size: 1rem;
+        }
+
+        .input-row {
+            display: flex;
+            flex-direction: row;
+            gap: 6px;
+            margin-bottom: 6px;
+            align-items: flex-end; /* Align buttons nicely at bottom of textarea */
+        }
+
+        /* Replaced input with a textarea for multiline support */
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            background-color: #1e1e1e;
+            color: white;
+            font-size: 1rem;
+            min-height: 50px;   /* Minimum visible height */
+            max-height: 150px;  /* Optional: limit how tall the box can get */
+            resize: vertical;   /* Allow manual resizing if desired */
+        }
+
+        .send-button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            background-color: #ff4d4d;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .send-button:hover {
+            background-color: #e03a3a;
+            transform: scale(1.05);
+            transition: all 0.2s ease;
+        }
+
+        .send-button:hover {
+            background-color: #ff4d4d;
+        }
+
+        .kitsune-bucks {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .bucks-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .bucks-button {
+            flex: 1;
+            padding: 10px;
+            background-color: #3a3a3a;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .bucks-button:hover {
+            background-color: #5a5a5a;
+        }
+        .round-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            align-self: flex-end; /* 👈 keeps them aligned with Send button */
+        }
+        .round-button:hover {
+            background-color: #e03a3a;
+            transform: scale(1.05);
+            transition: all 0.2s ease;
+        }
+
+        .pill-button {
+            padding: 6px 16px;
+            border-radius: 20px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .pill-button:hover {
+            background-color: #e03a3a;
+            transform: scale(1.05);
+            transition: all 0.2s ease;
+        }
+
+        .dark-pill-button {
+            padding: 6px 16px;
+            border-radius: 20px;
+            background-color: #3a3a3a;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .dark-pill-button:hover {
+            background-color: #353535;
+            transform: scale(1.05);
+            transition: all 0.2s ease;
+        }
+
+        #typing-indicator {
+            display: none;
+            font-size: 0.95rem;
+            color: #be8213;
+            font-style: italic;
+            margin: 8px 0;
+        }
+
+        .tail {
+            display: inline-block;
+            animation: wag 1s infinite;
+            transform-origin: center;
+        }
+
+        @keyframes wag {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(15deg); }
+            50% { transform: rotate(0deg); }
+            75% { transform: rotate(-15deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        @media (min-width: 768px) {
+            .chat-container {
+                max-width: 600px;
+            }
+
+            .chat-box {
+                max-height: 500px;
+                font-size: 1.05rem;
+            }
+        }
+        .message { margin-bottom: 8px; }
+        .message-row {
+            display: flex;
+            width: 100%;
+        }
+
+        .message-row.left {
+            justify-content: flex-start;
+        }
+
+        .message-row.right {
+            justify-content: flex-end;
+        }
+
+        .message.user {
+            background-color: #ff4d4d;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 18px;
+            max-width: 75%;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 1rem;
+            line-height: 1.4;
+            text-align: left;
+
+            /* 🔧 Fixes below */
+            display: inline-block;
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+
+        .message.kohana { 
+            color: #fff; 
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-left: 0;  /* 👈 ensures no weird indent */
+            padding-left: 0;
+        }
+        .message.kohana code,
+        .message.kohana pre {
+            background-color: #1e1e1e;
+            color: #c0f0ff;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            line-height: 1.4;              /* 👈 Prevents overlapping lines */
+            display: block;    
+        }
+        .message.kohana.list pre {
+            color: #d0ffc0;
+        }
+
+        .chat-box {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch; /* Allow full width but don't enforce left alignment */
+            padding: 12px 10px;
+            max-height: 60vh;
+            overflow-y: auto;
+            background-color: rgba(25, 25, 25, 0.85);
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+
+        @media (max-width: 400px) {
+            .chat-container {
+                max-width: 98%;
+                padding: 10px;
+            }
+
+            .chat-box {
+                padding: 8px 4px;
+                font-size: 0.95rem;
+            }
+
+            .input-row {
+                gap: 6px;
+                margin-bottom: 6px;
+            }
+
+            #user-input {
+                font-size: 0.95rem;
+                max-height: 100px;
+            }
+
+            .round-button {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+
+            .send-button {
+                padding: 8px 12px;
+                font-size: 0.95rem;
+            }
+
+            .pill-button,
+            .dark-pill-button {
+                font-size: 0.9rem;
+                padding: 4px 12px;
+            }
+
+            .message.user {
+                font-size: 0.95rem;
+                padding: 8px 10px;
+            }
+
+            .message.kohana {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2 style="margin-top: 0;">P.A.A.I.G. 2.5</h2>
+        <!-- Flex container for the buttons -->
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="dark-pill-button" onclick="toggleSketchPad()">🖋️ Sketch Pad</button>
+            <button class="round-button" style="margin-left: auto;" onclick="toggleSettings()">⚙️</button>
+        </div>
+
+        <!-- Sketchpad Panel (stays hidden until toggled) -->
+        <div id="sketchpad-wrapper" style="margin-top: 10px;">
+            <div id="sketchpad-panel" style="display: none; background: rgba(20, 20, 20, 0.95); padding: 10px; border-radius: 8px; margin-top: 10px;">
+                <h4 style="margin-top: 0;">Draw a sketch or diagram</h4>
+                <div style="width: 100%; overflow-x: auto;">
+                    <canvas id="kohana-canvas" width="512" height="512" style="border: 1px solid #888; background: white; cursor: crosshair; max-width: 100%; height: auto;"></canvas>
+                </div>
+                <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="dark-pill-button" onclick="clearCanvas()">🧼 Clear</button>
+                    <button class="dark-pill-button" onclick="toggleTool()">🖊️ Toggle Pen/Eraser</button>
+                    <button class="pill-button" onclick="submitSketch()">✅ Use Sketch</button>
+                    <div id="tool-indicator" style="align-self: center; font-size: 0.9rem;">Current tool: ✏️ Pen</div>
+                </div>
+            </div>
+        </div>
+        <div id="settings-panel" style="display: none; background-color: rgba(50, 50, 50, 0.9); padding: 10px; border-radius: 8px;">
+            <h4 style="margin-top: 0;">Add New User</h4>
+            <input type="text" id="new-username" placeholder="Username (e.g., lily)" style="width: 100%; margin-bottom: 5px;">
+            <input type="text" id="new-name" placeholder="Display Name (e.g., Lily)" style="width: 100%; margin-bottom: 5px;">
+            <input type="text" id="new-relationship" placeholder="Relationship (e.g., Sister)" style="width: 100%; margin-bottom: 5px;">
+            <input type="text" id="new-tone" placeholder="Tone (e.g., Calm, Friendly)" style="width: 100%; margin-bottom: 5px;">
+            <button class="pill-button" onclick="submitNewUser()">Add User</button>
+            <hr/>
+            <label for="modeToggle">Mode:</label>
+            <select id="modeToggle" onchange="setMode()">
+            <option value="casual">Casual Mode</option>
+            <option value="work">Work Mode</option>
+            </select>
+            <button class="pill-button" onclick="clearChat()">🧹 Clear Chat</button>
+            <button class="pill-button" onclick="resetMemory()">💿 Reset Memory</button>
+            <button class="pill-button" onclick="restartKohana()">🔁 Restart Kohana</button>
+        </div>
+
+        <div id="chat-box" class="chat-box"></div>
+
+        <div id="typing-indicator">
+            <span class="tail">🦊</span> Kohana is typing...
+        </div>
+        <audio id="kohana-voice" src="/static/audio/kohana_response.mp3" hidden></audio>
+
+        <div style="display: flex; gap: 10px; margin-top: 5px;">
+            <label for="username" style="margin-right: 5px;">Talking as:</label>
+            <select id="username" name="username">
+                <option value="malachi">Malachi</option>
+                <option value="auggie">Auggie</option>
+                <option value="addie">Addie</option>
+            </select>
+            <div class="kitsune-bucks" style="margin-left: auto;">
+                Kitsune Bucks: <span id="bucks-count">0</span>
+            </div>
+        </div>
+
+        <!-- The main input row with a multiline textarea -->
+        <div class="input-row">
+            <textarea id="user-input" placeholder="Type your message... (Shift+Enter for newline)" onkeydown="checkEnter(event)"></textarea>
+            <button class="round-button" onclick="sendMessage()">↑</button>
+            <button class="round-button" onclick="playKohanaVoice()">▶️</button>
+            <button class="round-button" onclick="toggleVoiceInput(this)">🎤</button>
+        </div>
+
+        <div style="margin-bottom: 10px;">
+            <input type="file" id="attachment-input" />
+
+        </div>
+        <div class="bucks-buttons">
+            <button class="dark-pill-button" onclick="updateBucks('add')">Add Bucks</button>
+            <button class="dark-pill-button" onclick="updateBucks('remove')">Remove Bucks</button>
+        </div>
+        <div style="display: flex; justify-content: center; margin-top: 10px;">
+                <button class="pill-button" onclick="window.location.href='/os'">🖥️ OS Mode</button>
+        </div>
+    </div>
+
+    <script>
+
+        let drawing = false;
+        let erasing = false;
+        const canvas = document.getElementById("kohana-canvas");
+        const ctx = canvas.getContext("2d");
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "black";
+
+        canvas.addEventListener("mousedown", (e) => {
+        drawing = true;
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+        });
+
+        canvas.addEventListener("mousemove", (e) => {
+        if (!drawing) return;
+        if (erasing) {
+            ctx.clearRect(e.offsetX - 5, e.offsetY - 5, 10, 10);
+        } else {
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+        }
+        });
+
+        canvas.addEventListener("mouseup", () => {
+        drawing = false;
+        });
+
+        canvas.addEventListener("mouseleave", () => {
+        drawing = false;
+        });
+
+        canvas.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            ctx.beginPath();
+            ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+            drawing = true;
+        }, { passive: false });
+
+        canvas.addEventListener("touchmove", (e) => {
+            e.preventDefault();
+            if (!drawing) return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
+            if (erasing) {
+                ctx.clearRect(x - 5, y - 5, 10, 10);
+            } else {
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+        }, { passive: false });
+
+        canvas.addEventListener("touchend", () => drawing = false);
+
+        let audioUnlocked = false;
+
+        function unlockAudioPlayback() {
+            if (audioUnlocked) return;
+
+            const audio = document.getElementById("kohana-voice");
+            try {
+                audio.volume = 0;
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.volume = 1;
+                    audioUnlocked = true;
+                    isUserInteracted = true;
+                    console.log("🔓 Audio permission unlocked.");
+                }).catch(err => {
+                    console.warn("🔒 Audio still blocked:", err);
+                });
+            } catch (err) {
+                console.warn("⚠️ Audio unlock failed:", err);
+            }
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function toggleTool() {
+        erasing = !erasing;
+        document.getElementById("tool-indicator").textContent = `Current tool: ${erasing ? "🧼 Eraser" : "✏️ Pen"}`;
+        ctx.strokeStyle = erasing ? "white" : "black";
+        }
+
+        function toggleSketchPad() {
+        const panel = document.getElementById("sketchpad-panel");
+        panel.style.display = panel.style.display === "none" ? "block" : "none";
+        }
+
+        function submitSketch() {
+            const dataUrl = canvas.toDataURL("image/png");
+            const preview = document.getElementById("image-gen-preview");
+            preview.innerHTML = "<em>🦊 Kohana is sketching...</em>";
+
+            fetch("/submit-sketch", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ image_data: dataUrl })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.filename) {
+                    const imageUrl = `/static/generated/${data.filename}?ts=${Date.now()}`;
+                    insertImageToChat(imageUrl);
+
+                    preview.innerHTML = `<div><img src="${imageUrl}" style="max-width:100%; border-radius:10px;"><br><em>🖋️ Sketch processed!</em></div>`;
+                } else {
+                    preview.innerHTML = `<div><strong>Error:</strong> ${data.error || "Sketch failed to process."}</div>`;
+                }
+            })
+            .catch(err => {
+                preview.innerHTML = `<div><strong>Error:</strong> ${err}</div>`;
+                console.error("Sketch submission error:", err);
+            });
+        }
+
+        function resetMemory() {
+            fetch("/reset-session", {
+                method: "POST"
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message || "Reset complete.");
+                location.reload(); // Optional: refresh chat window
+            });
+        }
+        // Save one message into localStorage
+        function saveMessage(role, text, type = "text") {
+            const key = "kohanaChatHistory";
+            const history = JSON.parse(localStorage.getItem(key) || "[]");
+            history.push({ role, text, type, ts: Date.now() });
+            localStorage.setItem(key, JSON.stringify(history));
+        }
+
+        function restartKohana() {
+            fetch('/restart_kohana', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => alert(data.status))
+                .catch(err => alert("Failed to restart Kohana."));
+        }
+
+        // Load and render all saved messages
+        function loadHistory() {
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML = "";
+            const history = JSON.parse(localStorage.getItem("kohanaChatHistory") || "[]");
+
+            history.forEach(msg => {
+                if (msg.role === "user") {
+                    chatBox.innerHTML += `
+                        <div class="message-row right">
+                            <div class="message user">⚡ <strong>You:</strong> ${escapeHtml(msg.text)}</div>
+                        </div>
+                    `;
+                } else {
+                    let rendered = "";
+                    const safeText = escapeHtml(msg.text.trim());
+                    if (msg.type === "image") {
+                        rendered = `
+                            <div class="message kohana">🦊 <strong>Kohana:</strong><br>
+                                <img src="${msg.text.replace('[Image: ', '').replace(']', '')}" style="max-width:100%; border-radius:10px;">
+                            </div>
+                        `;
+                    } else if (msg.type === "code") {
+                        rendered = `
+                            <div class="message kohana code">🦊 <strong>Kohana:</strong><pre><code>${safeText}</code></pre></div>
+                        `;
+                    } else if (msg.type === "list") {
+                        rendered = `
+                            <div class="message kohana list">🦊 <strong>Kohana:</strong><pre>${safeText}</pre></div>
+                        `;
+                    } else {
+                        rendered = `
+                            <div class="message kohana">🦊 <strong>Kohana:</strong><pre>${safeText}</pre></div>
+                        `;
+                    }
+                    chatBox.innerHTML += rendered;
+                }
+            });
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+
+        // Save history to server
+        async function saveServerHistory() {
+            const history = JSON.parse(localStorage.getItem("kohanaChatHistory") || "[]");
+            const username = document.getElementById("username").value || "malachi";
+
+            await fetch("/save-history", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, history })
+            });
+        }
+
+        
+        // Load history from server
+        async function loadServerHistory() {
+            const username = document.getElementById("username").value || "malachi";
+
+            const response = await fetch(`/get-history?username=${encodeURIComponent(username)}`);
+            const data = await response.json();
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML = "";
+
+            data.history.forEach(msg => {
+                if (msg.role === "user") {
+                    chatBox.innerHTML += `
+                        <div class="message-row right">
+                            <div class="message user">⚡ <strong>You:</strong> ${escapeHtml(msg.text)}</div>
+                        </div>
+                    `;
+                } else {
+                    let rendered = "";
+                    const safeText = escapeHtml(msg.text.trim());
+                    if (msg.type === "image") {
+                        rendered = `<div class="message kohana">🦊 <strong>Kohana:</strong><br><img src="${msg.text.replace('[Image: ', '').replace(']', '')}" style="max-width:100%; border-radius:10px;"></div>`;
+                    } else if (msg.type === "code") {
+                        rendered = `<div class="message kohana code">🦊 <strong>Kohana:</strong><pre><code>${safeText}</code></pre></div>`;
+                    } else if (msg.type === "list") {
+                        rendered = `<div class="message kohana list">🦊 <strong>Kohana:</strong><pre>${safeText}</pre></div>`;
+                    } else {
+                        rendered = `<div class="message kohana">🦊 <strong>Kohana:</strong><pre>${safeText}</pre></div>`;
+                    }
+                    chatBox.innerHTML += rendered;
+                }
+            });
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        </script>       
+
+    <script>
+        // Press Enter to send (unless Shift is held), Shift+Enter to create a new line
+        function checkEnter(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.innerText = text;
+            return div.innerHTML;
+            }
+
+        
+        async function sendMessage() {
+            const input = document.getElementById("user-input");
+            const attachmentInput = document.getElementById("attachment-input");
+            const chatBox = document.getElementById("chat-box");
+            const typingIndicator = document.getElementById("typing-indicator");
+            const userText = input.value.trim();
+            const username = document.getElementById("username").value;
+            const attachmentFile = attachmentInput.files[0];
+            const displayName = username.charAt(0).toUpperCase() + username.slice(1);
+
+            if (!userText && !attachmentFile) return;
+
+            // ✅ Clear input immediately after grabbing its value
+            input.value = "";
+            attachmentInput.value = "";
+
+            // 👤 Show user's message
+            if (userText) {
+                chatBox.innerHTML += `
+                    <div class="message-row right">
+                        <div class="message user">⚡ <strong>${displayName}:</strong> ${escapeHtml(userText)}</div>
+                    </div>
+                `;
+                saveMessage("user", userText);
+            }
+
+            typingIndicator.style.display = "block";
+
+            try {
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    body: (() => {
+                        const formData = new FormData();
+                        formData.append("user_input", userText);
+                        formData.append("username", username);
+                        if (attachmentFile) formData.append("attachment", attachmentFile);
+                        return formData;
+                    })()
+                });
+
+                const data = await response.json();
+                typingIndicator.style.display = "none";
+
+                const responseText = data.response.trim();
+                const contentType = data.type || "text";
+                const safeText = escapeHtml(responseText);
+
+                let rendered = "";
+
+                if (contentType === "image") {
+                    const imageUrl = responseText.replace("[Image: ", "").replace("]", "");
+                    rendered = `
+                        <div class="message kohana">🦊 <strong>Kohana:</strong><br>
+                            <img src="${imageUrl}" style="max-width:100%; border-radius:10px; margin-top:5px;">
+                        </div>`;
+                } else if (contentType === "file") {
+                    const fileUrl = responseText.replace("[File: ", "").replace("]", "");
+                    rendered = `
+                        <div class="message kohana">🦊 <strong>Kohana:</strong><br>
+                            <a href="${fileUrl}" target="_blank" style="color:#9ef;">📎 Download Attached File</a>
+                        </div>`;
+                } else if (contentType === "code") {
+                    rendered = `
+                        <div class="message kohana code">🦊 <strong>Kohana:</strong><pre><code>${safeText}</code></pre></div>`;
+                } else if (contentType === "list") {
+                    rendered = `
+                        <div class="message kohana list">🦊 <strong>Kohana:</strong><pre>${safeText}</pre></div>`;
+                } else {
+                    rendered = `
+                        <div class="message kohana">🦊 <strong>Kohana:</strong><pre>${safeText}</pre></div>`;
+                }
+
+                chatBox.innerHTML += rendered;
+                saveMessage("kohana", data.response, contentType);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                await saveServerHistory();
+
+
+            } catch (error) {
+                typingIndicator.style.display = "none";
+                chatBox.innerHTML += `<div><strong>Error:</strong> Something went wrong.</div>`;
+                console.error("Error sending message:", error);
+            }
+        }
+
+        function setMode() {
+            const mode = document.getElementById("modeToggle").value;
+            fetch('/update_mode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode })
+            })
+            .then(res => res.json())
+            .then(data => console.log(data.status));
+        }
+        
+        function toggleImageGen() {
+            const panel = document.getElementById("image-gen-panel");
+            panel.style.display = panel.style.display === "none" ? "block" : "none";
+        }
+
+        async function submitImageGen() {
+            const subject = document.getElementById("imggen-subject").value.trim();
+            const preset = document.getElementById("imggen-preset").value;
+            const extras = document.getElementById("imggen-extras").value.trim();
+
+            if (!subject) return alert("Please enter a subject.");
+
+            const formData = new FormData();
+            formData.append("subject", subject);
+            formData.append("preset", preset);
+            formData.append("extras", extras);
+
+            const preview = document.getElementById("image-gen-preview");
+            preview.innerHTML = "<em>🦊 Kohana is painting...</em>";
+
+            try {
+                const res = await fetch("/generate-image", { method: "POST", body: formData });
+                const data = await res.json();
+
+                if (data.filename) {
+                const timestamp = Date.now();
+                preview.innerHTML = `
+                    <div>
+                        <img src="/static/generated/${data.filename}?ts=${timestamp}" style="max-width:100%; border-radius:10px;">
+                        <br>
+                        <button class="send-button" style="margin-top: 10px;" onclick="insertImageToChat('/static/generated/${data.filename}?ts=${timestamp}')">🦊 Insert to Chat</button>
+                        <button class="bucks-button" onclick="deleteImagePreview()">🗑️ Delete Preview</button>
+                    </div>
+                    `;
+                } else {
+                preview.innerHTML = `<div><strong>Error:</strong> ${data.error || 'Unknown issue.'}</div>`;
+                }
+            } catch (err) {
+                console.error("Image gen error:", err);
+                preview.innerHTML = `<div><strong>Failed to generate image.</strong></div>`;
+            }
+        }
+
+        async function updateBucks(action) {
+            const endpoint = action === "add" ? "/add_bucks" : "/remove_bucks";
+            const response = await fetch(endpoint, { method: "POST" });
+            const data = await response.json();
+            document.getElementById("bucks-count").innerText = data.kitsune_bucks;
+        }
+
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const btn = document.querySelector("button[onclick='toggleMute()']");
+            btn.textContent = isMuted ? "🔇" : "🔊";
+        }
+
+        let isPlaying = false;
+        let isMuted = false;
+        let isUserInteracted = true; // <-- make sure this is initialized somewhere!
+
+        async function playKohanaVoice() {
+            unlockAudioPlayback();
+            if (isMuted || !isUserInteracted || isPlaying) return;
+
+            const audio = document.getElementById("kohana-voice");
+            const url = `/audio/kohana_response.mp3?ts=${Date.now()}`;
+            isPlaying = true;
+
+            try {
+                audio.pause();
+                audio.currentTime = 0;
+                await new Promise(res => setTimeout(res, 300));
+                audio.src = url;
+
+                await new Promise((resolve, reject) => {
+                    const onReady = () => {
+                        audio.removeEventListener("canplaythrough", onReady);
+                        audio.removeEventListener("error", onError);
+                        resolve();
+                    };
+                    const onError = (e) => {
+                        audio.removeEventListener("canplaythrough", onReady);
+                        audio.removeEventListener("error", onError);
+                        reject(new Error("Audio failed to load: " + e.message));
+                    };
+
+                    audio.addEventListener("canplaythrough", onReady);
+                    audio.addEventListener("error", onError);
+                    audio.load();
+                });
+
+                await audio.play();
+                console.log("🎧 Kohana voice playback started");
+
+                audio.onended = () => {
+                    isPlaying = false;
+                };
+
+            } catch (err) {
+                isPlaying = false;
+                console.warn("🎧 Voice playback failed:", err);
+                alert("Voice playback failed: " + err.message);
+            }
+        }
+
+        let recognition;
+
+        function toggleSettings() {
+            const panel = document.getElementById("settings-panel");
+            panel.style.display = panel.style.display === "none" ? "block" : "none";
+        }
+
+        async function submitNewUser() {
+            const username = document.getElementById("new-username").value.trim().toLowerCase();
+            const name = document.getElementById("new-name").value.trim();
+            const relationship = document.getElementById("new-relationship").value.trim();
+            const tone = document.getElementById("new-tone").value.trim();
+
+            if (!username || !name) {
+                alert("Please fill out at least a username and name.");
+                return;
+            }
+
+            const response = await fetch("/add-user", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    username,
+                    name,
+                    relationship,
+                    tone
+                })
+            });
+
+            const result = await response.json();
+            alert(result.message || "User added.");
+
+            if (result.success) {
+                const dropdown = document.getElementById("username");
+                dropdown.innerHTML += `<option value="${username}">${name}</option>`;
+            }
+        }
+
+        let mediaRecorder;
+        let micStream;
+
+        async function toggleVoiceInput(button) {
+            if (isRecording) {
+                mediaRecorder.stop();
+                micStream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+                button.textContent = "🎤";
+                console.log("🛑 Recording manually stopped.");
+                return;
+            }
+
+            console.log("🎤 Voice input requested...");
+            try {
+                micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log("✅ Microphone access granted.");
+                mediaRecorder = new MediaRecorder(micStream);
+                const chunks = [];
+
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    console.log("🛑 Recording stopped.");
+                    const blob = new Blob(chunks, { type: "audio/wav" });
+                    const formData = new FormData();
+                    formData.append("file", blob, "voice.wav");
+
+                    const response = await fetch("/transcribe", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.text) {
+                        console.log("✅ Transcription:", data.text);
+                        document.getElementById("user-input").value = data.text.trim();
+                        sendMessage();
+                    } else {
+                        console.warn("❌ Transcription failed:", data);
+                        alert("❌ Transcription failed.");
+                    }
+
+                    // Cleanup UI state
+                    button.textContent = "🎤";
+                    isRecording = false;
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                button.textContent = "⏹️";  // Stop icon
+                console.log("🎙️ Recording started.");
+
+            } catch (err) {
+                console.error("🚫 Failed to access microphone:", err);
+                alert("Microphone access failed. Check browser permissions.");
+                isRecording = false;
+                button.textContent = "🎤";
+            }
+        }
+
+
+
+
+        function deleteImagePreview() {
+            const preview = document.getElementById("image-gen-preview");
+            if (preview) {
+                preview.innerHTML = "";  // Fully wipes out the image and its container
+            }
+        }
+
+        function clearChat() {
+            localStorage.removeItem("kohanaChatHistory");
+            document.getElementById("chat-box").innerHTML = "";
+            }
+
+        let isRecording = false;
+
+        async function startVoiceInput() {
+            console.log("🎤 Voice input requested...");
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log("✅ Microphone access granted.");
+
+                const mediaRecorder = new MediaRecorder(stream);
+                const chunks = [];
+
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    console.log("🛑 Recording stopped.");
+                    const blob = new Blob(chunks, { type: "audio/wav" });
+                    const formData = new FormData();
+                    formData.append("file", blob, "voice.wav");
+
+                    const response = await fetch("/transcribe", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.text) {
+                        console.log("✅ Transcription:", data.text);
+                        document.getElementById("user-input").value = data.text.trim();
+                        sendMessage();
+                    } else {
+                        console.warn("❌ Transcription failed:", data);
+                        alert("❌ Transcription failed.");
+                    }
+                };
+
+                mediaRecorder.start();
+                console.log("🎙️ Recording started.");
+
+                setTimeout(() => {
+                    mediaRecorder.stop();
+                }, 10000);
+
+            } catch (err) {
+                console.error("🚫 Failed to access microphone:", err);
+                alert("Microphone access failed. Check browser permissions.");
+            }
+        }
+        
+        function insertImageToChat(imageUrl) {
+            const chatBox = document.getElementById("chat-box");
+
+            const imageHtml = `
+                <div class="message kohana">🦊 <strong>Kohana:</strong><br>
+                    <img src="${imageUrl}" style="max-width:100%; border-radius:10px; margin-top: 5px;">
+                </div>
+            `;
+
+            chatBox.innerHTML += imageHtml;
+            saveMessage("kohana", `[Image: ${imageUrl}]`, "image");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        window.onload = async () => {
+            const localKey = "kohanaChatHistory";
+            const localHistory = JSON.parse(localStorage.getItem(localKey) || "[]");
+
+            let serverHistory = [];
+            try {
+                const username = document.getElementById("username").value || "malachi";
+                const serverResp = await fetch(`/get-history?username=${encodeURIComponent(username)}`);
+                const serverData = await serverResp.json();
+                serverHistory = serverData.history || [];
+            } catch (err) {
+                console.error("Failed to fetch server history:", err);
+            }
+
+            const getLatestTimestamp = (history) => {
+                if (!history.length) return 0;
+                return Math.max(...history.map(m => m.ts || 0));
+            };
+
+            const localLatest = getLatestTimestamp(localHistory);
+            const serverLatest = getLatestTimestamp(serverHistory);
+
+            console.log(`🧠 Local history latest: ${localLatest}`);
+            console.log(`🌐 Server history latest: ${serverLatest}`);
+
+            if (localLatest >= serverLatest) {
+                console.log("📂 Loading local history...");
+                loadHistory();
+            } else {
+                console.log("🌎 Loading server history...");
+                const chatBox = document.getElementById("chat-box");
+                chatBox.innerHTML = "";
+                serverHistory.forEach(msg => {
+                    if (msg.role === "user") {
+                        chatBox.innerHTML += `
+                            <div class="message-row right">
+                                <div class="message user">⚡ <strong>You:</strong> ${escapeHtml(msg.text)}</div>
+                            </div>
+                        `;
+                    } else {
+                        let rendered = "";
+                        const safeText = escapeHtml(msg.text.trim());
+                        if (msg.type === "image") {
+                            rendered = `<div class="message kohana">🦊 <strong>Kohana:</strong><br><img src="${msg.text.replace('[Image: ', '').replace(']', '')}" style="max-width:100%; border-radius:10px;"></div>`;
+                        } else if (msg.type === "code") {
+                            rendered = `<div class="message kohana code">🦊 <strong>Kohana:</strong><pre><code>${safeText}</code></pre></div>`;
+                        } else if (msg.type === "list") {
+                            rendered = `<div class="message kohana list">🦊 <strong>Kohana:</strong><pre>${safeText}</pre></div>`;
+                        } else {
+                            rendered = `<div class="message kohana">🦊 <strong>Kohana:</strong><pre>${safeText}</pre></div>`;
+                        }
+                        chatBox.innerHTML += rendered;
+                    }
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+                // 🧹 After loading server-side, optionally update localStorage
+                localStorage.setItem(localKey, JSON.stringify(serverHistory));
+            }
+
+            // 🦊 Fetch Kitsune Bucks
+            try {
+                const response = await fetch("/get_bucks");
+                const data = await response.json();
+                document.getElementById("bucks-count").innerText = data.kitsune_bucks;
+            } catch (err) {
+                console.error("Failed to fetch Kitsune Bucks:", err);
+            }
+        };
+
+    </script>
+</body>
+</html>
