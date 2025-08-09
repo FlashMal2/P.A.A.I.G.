@@ -1,0 +1,74 @@
+
+from fastapi import UploadFile, File, Form, Request
+from fastapi.responses import JSONResponse
+import psutil, shutil, time, os
+from typing import List
+
+# Live system stats
+@app.get("/system-stats")
+def get_system_stats():
+    return {
+        "cpu": psutil.cpu_percent(),
+        "ram": psutil.virtual_memory().percent,
+        "disk": psutil.disk_usage("/").percent
+    }
+
+# Log connected IPs (simple memory-tracked for now)
+connected_ips = set()
+
+@app.middleware("http")
+async def track_ips(request: Request, call_next):
+    ip = request.client.host
+    connected_ips.add(ip)
+    return await call_next(request)
+
+@app.get("/system-devices")
+def get_devices():
+    return {"devices": list(connected_ips)}
+
+# File operations
+@app.post("/rename-file")
+def rename_file(old_path: str = Form(...), new_path: str = Form(...)):
+    try:
+        os.rename(old_path, new_path)
+        return {"message": "Renamed successfully"}
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.post("/delete-file")
+def delete_file(path: str = Form(...)):
+    try:
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        else:
+            os.remove(path)
+        return {"message": "Deleted successfully"}
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.post("/create-folder")
+def create_folder(path: str = Form(...)):
+    try:
+        os.makedirs(path, exist_ok=True)
+        return {"message": "Folder created"}
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.post("/create-file")
+def create_file(path: str = Form(...), content: str = Form("")):
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return {"message": "File created"}
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.post("/upload-file")
+async def upload_file(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        with open(file.filename, "wb") as f:
+            f.write(contents)
+        return {"message": "File uploaded"}
+    except Exception as e:
+        return {"error": str(e)}

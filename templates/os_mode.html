@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kohana OS - Mobile Dashboard</title>
+  <style>
+    :root {
+      --bg-dark: #0f0f0f;
+      --panel-dark: #1a1a1a;
+      --accent: #ff4d4d;
+      --text-light: #ccc;
+      --text-muted: #888;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-dark);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--text-light);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: var(--panel-dark);
+      border-bottom: 1px solid #333;
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    header a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .system-stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 0.5rem;
+      background-color: #111;
+      border-bottom: 1px solid #222;
+      gap: 0.5rem;
+    }
+
+    .stat-item {
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      margin: 0.15rem;
+      font-size: 0.85rem;
+      color: #eee;
+      min-width: 55px;
+      text-align: center;
+      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    }
+    .stat-item:hover {
+      box-shadow: 0 0 8px var(--accent);
+      transition: box-shadow 0.2s ease;
+    }
+    .main {
+      flex-grow: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      padding: 0.5rem;
+      background-color: var(--panel-dark);
+      border-top: 1px solid #222;
+    }
+
+    .tool-button {
+      text-align: center;
+      background: transparent;
+      color: var(--accent);
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0.5rem;
+      flex: 1 1 30%;
+      max-width: 100px;
+    }
+
+    .tool-button:hover {
+      text-shadow: 0 0 5px var(--accent);
+    }
+
+    .output-box {
+      background-color: #1e1e1e;
+      color: #eee;
+      padding: 1rem;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      min-height: 150px;
+    }
+
+    .chat-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: #111;
+  border-top: 1px solid #333;
+}
+
+  .chat-bar button {
+    background-color: var(--accent);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .chat-bar button:hover {
+    background-color: #e03a3a;
+    transform: scale(1.05);
+    transition: all 0.2s ease;
+  }
+
+
+    .chat-bar textarea {
+      flex: 1;
+      min-height: 50px;
+      max-height: 100px;
+      resize: vertical;
+      background-color: #222;
+      color: #fff;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 0.5rem;
+    }
+    .round-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 4px; /* tweak this to nudge into perfect alignment */
+    }
+
+    .round-button:hover {
+      background-color: #e03a3a;
+      transform: scale(1.05);
+      transition: all 0.2s ease;
+    }
+
+    .chat-bar button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 4px; 
+    }
+    pre, code {
+      line-height: 1.4;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+    .kohana {
+      animation: fadeIn 0.3s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div>🦊 Kohana OS</div>
+    <a href="/">Assistant Mode</a>
+  </header>
+
+  <div class="system-stats">
+    <div class="stat-item">CPU: <span id="cpu">--%</span></div>
+    <div class="stat-item">RAM: <span id="ram">--%</span></div>
+    <div class="stat-item">Disk: <span id="disk">--%</span></div>
+    <div class="stat-item">GPU: <span id="gpu">--%</span></div>
+    <div class="stat-item">Temp: <span id="temp">--°C</span></div>
+  </div>
+
+  <div class="main">
+    <div id="tool-container">
+      <div class="output-box" id="tool-output">Welcome to OS Mode. Select a tool below.</div>
+    </div>
+  
+    <div id="chat-container" style="margin-top:1rem;">
+      <div class="output-box" id="chat-output"><em></em></div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button class="tool-button" onclick="loadTool('console')">🖥️ Console</button>
+    <button class="tool-button" onclick="loadTool('files')">📁 Files</button>
+    <button class="tool-button" onclick="loadTool('monitor')">📊 Monitor</button>
+    <button class="tool-button" onclick="loadTool('editor')">📝 Editor</button>
+    <button class="tool-button" onclick="loadTool('logs')">📄 Logs</button>
+    <button class="tool-button" onclick="loadTool('network')">🌐 Network</button>
+  </div>
+
+  <div class="chat-bar">
+    <textarea id="chatInput" placeholder="Ask Kohana something... (Shift+Enter for newline)"></textarea>
+    <button onclick="sendChat()">↑</button>
+  </div>
+
+  <script>
+    async function loadTool(tool) {
+    const output = document.getElementById('tool-output');
+    output.textContent = `Loading ${tool}...`;
+    
+
+    try {
+        const res = await fetch(`/tool/${tool}`);
+        const html = await res.text();
+
+        // Replace content
+        output.innerHTML = html;
+
+        // 🧠 Extract and eval any inline <script> tags
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        tempDiv.querySelectorAll('script').forEach(script => {
+        const newScript = document.createElement('script');
+        if (script.src) {
+            newScript.src = script.src;
+        } else {
+            newScript.textContent = script.textContent;
+        }
+        document.body.appendChild(newScript);
+        });
+      attachTerminalEvents();
+    } catch (err) {
+        output.textContent = `Error loading ${tool}.`;
+    }
+    }
+
+
+    async function sendChat() {
+      const textarea = document.getElementById('chatInput');
+      const text = textarea.value.trim();
+      if (!text) return;
+
+      const formData = new FormData();
+      formData.append("username", "Malachi");
+      formData.append("user_input", text);
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        const contentType = data.type || "text";
+        const safeText = escapeHtml(data.response.trim());
+
+        let formattedResponse = "";
+
+        if (contentType === "code") {
+          formattedResponse = `<div class="message kohana code">🦊 <strong>Kohana:</strong><pre><code>${safeText}</code></pre></div>`;
+        } else if (contentType === "list") {
+          formattedResponse = `<div class="message kohana list">🦊 <strong>Kohana:</strong><pre>${safeText}</pre></div>`;
+        } else {
+          formattedResponse = `<div class="message kohana">🦊 <strong>Kohana:</strong><pre>${safeText}</pre></div>`;
+        }
+
+        const chatOutput = document.getElementById('chat-output'); 
+        chatOutput.innerHTML += formattedResponse;  // ✅ not `output.innerHTML`
+        chatOutput.scrollTop = chatOutput.scrollHeight;
+
+        saveOSMessage("user", text); // Save user message
+        saveOSMessage("kohana", data.response, contentType); // Save Kohana's response
+      } catch (err) {
+        document.getElementById("output").textContent = "Error communicating with Kohana.";
+      }
+
+      textarea.value = "";
+    }
+
+
+    async function fetchSystemStats() {
+      try {
+        const res = await fetch("/system-stats");
+        const stats = await res.json();
+        document.getElementById("cpu").textContent = stats.cpu;
+        document.getElementById("ram").textContent = stats.ram;
+        document.getElementById("disk").textContent = stats.disk;
+        document.getElementById("gpu").textContent = stats.gpu || "--";
+        document.getElementById("temp").textContent = stats.temp || "--";
+      } catch (err) {
+        console.error("Failed to fetch system stats");
+      }
+    }
+
+    setInterval(fetchSystemStats, 5000);
+    fetchSystemStats();
+  </script>
+  <script>
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.innerText = text;
+      return div.innerHTML;
+    }
+    
+    function saveOSMessage(role, text, type = "text") {
+      const key = "kohanaOSHistory";
+      const history = JSON.parse(localStorage.getItem(key) || "[]");
+      history.push({ role, text, type, ts: Date.now() });
+      localStorage.setItem(key, JSON.stringify(history));
+    }
+
+    function loadOSHistory() {
+      const output = document.getElementById("output");
+      const history = JSON.parse(localStorage.getItem("kohanaOSHistory") || "[]");
+
+      if (history.length === 0) {
+        output.innerHTML = "Welcome to OS Mode. Select a tool below.";
+        return;
+      }
+
+      output.innerHTML = "";
+      history.forEach(msg => {
+        const safeText = escapeHtml(msg.text.trim());
+        let formatted = "";
+
+        if (msg.role === "kohana") {
+          if (msg.type === "code") {
+            formatted = `<div class="message kohana code">🦊 <strong>Kohana:</strong><pre><code>${safeText}</code></pre></div>`;
+          } else if (msg.type === "list") {
+            formatted = `<div class="message kohana list">🦊 <strong>Kohana:</strong><pre>${safeText}</pre></div>`;
+          } else {
+            formatted = `<div class="message kohana">🦊 <strong>Kohana:</strong><pre>${safeText}</pre></div>`;
+          }
+        } else {
+          formatted = `<div class="message user">⚡ <strong>You:</strong> ${safeText}</div>`;
+        }
+
+        output.innerHTML += formatted;
+      });
+    }  
+  </script>
+
+  <script>
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.innerText = text;
+      return div.innerHTML;
+    }
+
+    function runTerminal() {
+      const input = document.getElementById('terminal-command');
+      const outputBox = document.getElementById('terminal-output');
+      if (!input || !outputBox) return;
+
+      const command = input.value.trim();
+      if (!command) return;
+
+      outputBox.innerHTML += `<div class="terminal-line"><span class="prompt">malachi@kohanaOS:~$</span> ${escapeHtml(command)}</div>`;
+
+      const formData = new FormData();
+      formData.append('command', command);
+
+      fetch('/run-terminal', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.stdout) {
+          outputBox.innerHTML += `<div class="terminal-line">${escapeHtml(data.stdout)}</div>`;
+        }
+        if (data.stderr) {
+          outputBox.innerHTML += `<div class="terminal-line stderr">${escapeHtml(data.stderr)}</div>`;
+        }
+        outputBox.scrollTop = outputBox.scrollHeight;
+      })
+      .catch(err => {
+        outputBox.innerHTML += `<div class="terminal-line stderr">[Error] ${err}</div>`;
+      });
+
+      saveTerminalLog(command);
+      input.value = '';
+    }
+
+    function saveTerminalLog(cmd) {
+      const logs = JSON.parse(localStorage.getItem("terminalLog") || "[]");
+      logs.push(`[${new Date().toLocaleTimeString()}] ${cmd}`);
+      localStorage.setItem("terminalLog", JSON.stringify(logs));
+    }
+
+    function attachTerminalEvents() {
+      const input = document.getElementById('terminal-command');
+      if (input) {
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            runTerminal();
+          }
+        });
+      }
+    }
+  </script>
+
+  <script>
+    window.onload = () => {
+      fetchSystemStats();
+      loadOSHistory();
+    };
+  </script>
+</body>
+</html>
