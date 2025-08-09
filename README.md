@@ -1,6 +1,74 @@
-# P.A.A.I.G.
-Programmed Algorithmic Artificial Intelligence Generation (2.5)
-This is the smaller version of a personal AI architecture that I have been working on. 
-It uses a qunatized version of Qwen3 500M, and runs entirely on a PI 5 16GB. The larger architecture runs with a quantized MythoMax 13B on an RTX 3060 / Ryzen 5 with 32 GB or ram. 
-Highlights include a lightweght machine learning build that saves chat memories to a FAISS index via an SQL Database that can be referred to later as needed, a scratchpad that let's the model break things down into steps and use various tools, and some lighweght tools (calculator, web-augmentated searches, reminders and notes.) The larger architecture is experimental and migrates some of the lighter tools into the scratchpad to allow the model to choose when to use each of these tools instead of acting on command alone. The architecture also has a short term context window that it uses to remember the current conversation. I have seen some emergent behavior over time with use and have been upgrading the architecture. Eventually the goal was to run the smaller one as a localized mobile version of the architecture on the go, and have it update to the larger version as I go, but this is still a work in progress and hasn't been implemented yet. The architecture can use whisper to receive prompts via voice and has a lightweight voice that can play sound via edge-tts. I created my own wrapper via fast-api that can boot up and be accessed via web and runs through tailscale for access anywhere as long as the PI / Main computer is on and has access to the internet. The chat.html and personality are personalized, however can be modified ealiy to meet the needs of different use-cases. 
-Note - will be returning with an index soon, but the main logic is housed in kohana_chat3.py.
+PAAIG - Project Overview & Module Documentation
+PAAIG is a modular, locally-hosted AI assistant designed for conversational intelligence, situational awareness, creative tools, and adaptive memory systems. It integrates a large language model (LLM) with long-term memory, environmental awareness, and optional generative capabilities like Stable Diffusion.
+
+Getting Started
+Requirements:
+    • Python 3.10+
+    • FastAPI, Uvicorn
+    • psutil, FAISS, SQLAlchemy
+    • NVIDIA GPU (for Stable Diffusion & GPU stats)
+Installation:
+pip install -r requirements.txt
+Run Kohana:
+python main.py
+Then open http://localhost:8000 in your browser.
+
+Main Application (main.py)
+The entry point for running Kohana. Initializes FastAPI routes, handles the web UI (chat.html, os_mode.html), and connects user requests to the AI logic.
+Responsibilities:
+    • Starts the web server.
+    • Routes API requests to the LLM.
+    • Loads chat and OS mode interfaces.
+
+Core LLM & Compiler Logic (kohana_chat3.py)
+Manages conversation flow, reasoning, and structured output.
+Features:
+    • Processes user input through the LLM.
+    • Uses a compiler step for structured responses.
+    • Integrates situational awareness, memory, and tool calls.
+    • Supports reflection and emergent behavior.
+
+Memory Management (memory_manager.py)
+Hybrid FAISS + SQL database for semantic and structured recall.
+Features:
+    • Vector search for semantic memory.
+    • SQL for structured, tagged memories.
+    • Supports emotional tagging and decay logic.
+
+Session Management (session_manager.py)
+Stores and trims session history for token-efficient context reloads.
+Features:
+    • Daily full log rotation.
+    • Trimmed logs for fast context reloading.
+Example:
+from session_manager import update_session, load_trimmed_session
+update_session("Hello", "Hi there!", "Reflection: Engaged")
+print(load_trimmed_session())
+
+Situational Awareness (situational_awareness.py)
+Gathers machine and environment details for contextual AI responses.
+Captures:
+    • Time of day
+    • Hostname, IP
+    • OS details
+    • CPU/memory usage
+    • GPU stats via nvidia-smi
+    • Client type detection
+
+Image Generation (image_generator_module.py)
+Wrapper for Stable Diffusion + ControlNet with style presets.
+Features:
+    • Txt2Img & Img2Img
+    • ControlNet support
+    • Style presets & negative prompts
+Example:
+args = {"subject": "kitsune girl", "preset": "anime", "refine": True}
+result = tool_entry(json.dumps(args))
+
+Index
+    1. Main Application
+    2. Core LLM & Compiler Logic
+    3. Memory Management
+    4. Session Management
+    5. Situational Awareness
+    6. Image Generation
