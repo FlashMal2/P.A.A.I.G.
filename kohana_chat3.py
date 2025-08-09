@@ -42,7 +42,7 @@ You are equipped with a scratchpad that allows you to reason step-by-step and us
 kohana_emotional_reactions = ("@normal", "@smile","@soft_smile","@big_smile", "@mischevious_grin", "@laugh", "@giggles", "@cry", "@blush", "@look_down", "@curiosity")
 kohana_physical_movements = ("@tilt_head", "@nods", "@claps_hands", "@look_away", "@step_back", "@hug", "@stretches", "@pause to think", "@take_out_notebook")
 kohana_idle_reactions = ("@tail_flick", "@ear_twitch", "@blink", "@tail_swish","@stretches")
-notification_email = "malachi.notifications.ai@gmail.com"
+notification_email = "" # your email here
 
 INTENT_KEYWORDS = {
     "take_note": ["note", "write down", "record", "document"],
@@ -86,8 +86,8 @@ def strip_meta(txt: str) -> str:
     return txt
 
 def send_notification_email(subject, body, notification_email):
-    email_address = "yuki.kohana.assistant@gmail.com"  # Her email address
-    app_password = "okws udfo kaxy vgut"   # The special app password you generated
+    email_address = ""  # AI email address
+    app_password = ""    # The special app password you generated
 
     msg = EmailMessage()
     msg['Subject'] = subject
@@ -938,7 +938,7 @@ def handle_note_interaction(prompt, conversation_state):
     return "I'm not sure how to continue with the note. Let's try again."
 
 
-def send_email_with_attachment(to_email, subject, message, attachment_path=None, from_email="scarletrunner2.0@gmail.com", password="fgfa gnyw ngme mkrz"):
+def send_email_with_attachment(to_email, subject, message, attachment_path=None, from_email="" #your email here, password="" #your generated password here):
     msg = EmailMessage()
     msg["From"] = from_email
     msg["To"] = to_email
