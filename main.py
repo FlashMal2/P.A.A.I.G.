@@ -33,7 +33,7 @@ UPLOADS_DIR = Path("static/uploads")   #  <- move uploads inside ./static
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 last_interaction_time = time.time()
-notification_email = "malachi.notifications.ai@gmail.com"
+notification_email = "" #your personal email here
 
 def error_messages(message):
     print(message)
