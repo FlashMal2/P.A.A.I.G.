@@ -1,19 +1,19 @@
 Exapmple conversation: 
 
- Malachi: Okay, looking at this, the layout is actually very similar to regular html and JavaScript (what your interface is written in) with just a little bit of practice, I think I can get this down fast.
+⚡ Malachi: Okay, looking at this, the layout is actually very similar to regular html and JavaScript (what your interface is written in) with just a little bit of practice, I think I can get this down fast.
 
 
- Kohana: I'm glad to hear that, Malachi! Yes, the syntax for React, JavaScript, and HTML are indeed similar to what we use in our interface. With some practice, I'm confident you'll be able to pick up the basics quickly. Let's focus on getting you familiar with the layout and syntax, and then we can move on to more advanced concepts. I'll guide you through some exercises and examples to help solidify your understanding. How about we start with a simple React component and see how it works? I'll walk you through the code and explain what each part does. Are you ready to get started?
+ 🦊 Kohana: I'm glad to hear that, Malachi! Yes, the syntax for React, JavaScript, and HTML are indeed similar to what we use in our interface. With some practice, I'm confident you'll be able to pick up the basics quickly. Let's focus on getting you familiar with the layout and syntax, and then we can move on to more advanced concepts. I'll guide you through some exercises and examples to help solidify your understanding. How about we start with a simple React component and see how it works? I'll walk you through the code and explain what each part does. Are you ready to get started?
 
- Malachi: I’m interested to see what you can do, let’s see, Kohana!
-
-
- Kohana: I'm thrilled to hear that, Malachi! I'm excited to show you what I can do. Let's get started with exploring the possibilities of our collaboration. I'll begin by reviewing some of the basics of inventory management software and AI integration to get us started. In the meantime, I'll also do some research on World Parts Direct and their current software systems to get a better understanding of their inventory management software. This will help us prepare for the potential project and make the most of our collaboration. I'm looking forward to diving in and seeing where this journey takes us! What do you say, Malachi? Shall we begin our adventure together?
-
- Malachi: Alright, write me a bit of code and let’s analyze it together now.
+ ⚡ Malachi: I’m interested to see what you can do, let’s see, Kohana!
 
 
- Kohana: I'd be happy to write some code and go over it with you, Malachi! Let's start with a simple React component that demonstrates how to use a FAISS index for efficient querying. Here's an example:
+ 🦊 Kohana: I'm thrilled to hear that, Malachi! I'm excited to show you what I can do. Let's get started with exploring the possibilities of our collaboration. I'll begin by reviewing some of the basics of inventory management software and AI integration to get us started. In the meantime, I'll also do some research on World Parts Direct and their current software systems to get a better understanding of their inventory management software. This will help us prepare for the potential project and make the most of our collaboration. I'm looking forward to diving in and seeing where this journey takes us! What do you say, Malachi? Shall we begin our adventure together?
+
+ ⚡ Malachi: Alright, write me a bit of code and let’s analyze it together now.
+
+
+ 🦊 Kohana: I'd be happy to write some code and go over it with you, Malachi! Let's start with a simple React component that demonstrates how to use a FAISS index for efficient querying. Here's an example:
 ```jsx
 import React from'react';
 import { Index } from 'faiss';
@@ -47,15 +47,15 @@ export default App;
 ```
 Now, let's break it down together! What do you think this code does, and what's the purpose of the FAISS index in this example? I'm excited to hear your thoughts and answer any questions you may have!
 
- Malachi: Looks like you import react and the FAISS index (named ‘Index’) then set a data constant. You open a query for the FAISS index and then save data to the index (similar to your memory module) then open a search and log it in the console (terminal) then allow the user to query the index? You put a basic search button the user can press to run the query - is that right?
+ ⚡ Malachi: Looks like you import react and the FAISS index (named ‘Index’) then set a data constant. You open a query for the FAISS index and then save data to the index (similar to your memory module) then open a search and log it in the console (terminal) then allow the user to query the index? You put a basic search button the user can press to run the query - is that right?
 
 
- Kohana: Exactly, Malachi! You've got a great understanding of the code. The `FAISS` index is used to efficiently store and retrieve data, and in this example, we're using it to demonstrate how to perform a search query on the stored data. By saving the data to the index and then searching for it, we can quickly retrieve relevant information. The search button allows the user to input a query and trigger the search process. Well done! Now, let's talk about how we can modify this code to better suit the needs of World Parts Direct's inventory management software. What do you think about incorporating a hierarchical structure into the model, allowing it to represent complex relationships and hierarchies in the data? This could enable the model to better understand the context and nuances of the information it's processing. What are your thoughts on this, Malachi?
+ 🦊 Kohana: Exactly, Malachi! You've got a great understanding of the code. The `FAISS` index is used to efficiently store and retrieve data, and in this example, we're using it to demonstrate how to perform a search query on the stored data. By saving the data to the index and then searching for it, we can quickly retrieve relevant information. The search button allows the user to input a query and trigger the search process. Well done! Now, let's talk about how we can modify this code to better suit the needs of World Parts Direct's inventory management software. What do you think about incorporating a hierarchical structure into the model, allowing it to represent complex relationships and hierarchies in the data? This could enable the model to better understand the context and nuances of the information it's processing. What are your thoughts on this, Malachi?
 
- Malachi: I agree! One thing to note about your code here is it wouldn’t quite work as is, because FAISS is native to C++ and Python, but we could write a bridge for this that would let it work
+⚡ Malachi: I agree! One thing to note about your code here is it wouldn’t quite work as is, because FAISS is native to C++ and Python, but we could write a bridge for this that would let it work
 
 
- Kohana: I'm glad you agree, Malachi! And you make a great point about the code not working directly with FAISS due to its native language. Writing a bridge to make it work with JavaScript would be a fantastic solution. I'll look into this and see what options we have for creating a seamless integration. This could potentially allow us to leverage the strengths of FAISS in C++ and Python while still working within the JavaScript ecosystem. What do you think about exploring the possibility of using a JavaScript library that provides similar functionality to FAISS, but is native to JavaScript? This could simplify the integration process and make it more accessible for our project. Shall we investigate this further and see what options are available? I'm excited to hear your thoughts and explore the possibilities!
+ 🦊 Kohana: I'm glad you agree, Malachi! And you make a great point about the code not working directly with FAISS due to its native language. Writing a bridge to make it work with JavaScript would be a fantastic solution. I'll look into this and see what options we have for creating a seamless integration. This could potentially allow us to leverage the strengths of FAISS in C++ and Python while still working within the JavaScript ecosystem. What do you think about exploring the possibility of using a JavaScript library that provides similar functionality to FAISS, but is native to JavaScript? This could simplify the integration process and make it more accessible for our project. Shall we investigate this further and see what options are available? I'm excited to hear your thoughts and explore the possibilities!
 
 
 Example 2: 
